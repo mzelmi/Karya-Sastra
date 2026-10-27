@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -5,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kuis Sastra & Bahasa Indonesia Interaktif</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Include html2canvas for capturing screenshot of result card -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body {
@@ -55,9 +58,9 @@
             <h1 class="text-2xl md:text-3xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-300">
                 Kuis Sastra & Bahasa Indonesia
             </h1>
-            <!-- Diperbesar ukuran tulisannya & tulisan SD/MI berprestasi dihilangkan -->
+            <!-- Diperbesar ukuran tulisannya & tanpa tulisan SD/MI berprestasi -->
             <div class="mt-2">
-                <span class="inline-block bg-gradient-to-r from-yellow-500/30 to-pink-500/30 border border-yellow-400/50 text-yellow-300 text-base md:text-lg font-extrabold px-6 py-2.5 rounded-full shadow-md tracking-wider">
+                <span class="inline-block bg-gradient-to-r from-yellow-500/30 to-pink-500/30 border border-yellow-400/50 text-yellow-300 text-lg md:text-xl font-extrabold px-6 py-2.5 rounded-full shadow-md tracking-wider">
                     🌟 KELAS 5 🌟
                 </span>
             </div>
@@ -72,7 +75,7 @@
                 </label>
                 <input type="text" id="student-name" placeholder="Contoh: Salsabila Putri" class="w-full px-4 py-3.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/30 text-sm md:text-base font-medium transition">
                 <p id="name-error" class="text-pink-400 text-xs mt-1.5 font-medium hidden flex items-center gap-1">
-                    <span>⚠️</span> Silakan masukkan nama lengkap kamu terlebih dahulu ya!
+                    <span>⚠️</span> <span id="error-text">Silakan masukkan nama lengkap kamu terlebih dahulu ya!</span>
                 </p>
             </div>
 
@@ -116,20 +119,24 @@
 
         <!-- Result Screen -->
         <div id="result-screen" class="hidden text-center py-4 relative z-10">
-            <div class="text-7xl mb-3 animate-bounce" id="result-emoji">🏆</div>
-            <h2 class="text-2xl md:text-3xl font-extrabold mb-1 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-pink-300">Kuis Selesai!</h2>
-            <p class="text-indigo-200 text-sm md:text-base mb-4 font-medium">Kerja hebat, <span id="display-name" class="font-bold text-yellow-300"></span>!</p>
-            <p class="text-indigo-200 text-xs md:text-sm mb-6" id="result-message">Kamu telah menyelesaikan seluruh tantangan kuis dengan luar biasa.</p>
-            
-            <div class="bg-white/5 border border-white/15 rounded-2xl p-5 mb-6 shadow-inner">
-                <p class="text-xs md:text-sm text-indigo-300 font-semibold uppercase tracking-wider">Perolehan Skor Akhir Kamu:</p>
-                <p class="text-4xl md:text-5xl font-black text-yellow-400 mt-2"><span id="final-score">0</span> <span class="text-2xl text-gray-400">/ 100</span></p>
+            <!-- Elemen kartu yang akan ditangkap sebagai screenshot -->
+            <div id="capture-card" class="bg-indigo-950/80 border border-white/20 rounded-3xl p-6 mb-6 shadow-2xl relative">
+                <div class="text-7xl mb-3 animate-bounce" id="result-emoji">🏆</div>
+                <h2 class="text-2xl md:text-3xl font-extrabold mb-1 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-pink-300">Kuis Selesai!</h2>
+                <p class="text-indigo-200 text-sm md:text-base mb-3 font-medium">Kerja hebat, <span id="display-name" class="font-bold text-yellow-300"></span>!</p>
+                <p class="text-indigo-200 text-xs md:text-sm mb-5" id="result-message">Kamu telah menyelesaikan seluruh tantangan kuis dengan luar biasa.</p>
+                
+                <div class="bg-white/5 border border-white/15 rounded-2xl p-4 shadow-inner">
+                    <p class="text-xs md:text-sm text-indigo-300 font-semibold uppercase tracking-wider">Perolehan Skor Akhir Kamu:</p>
+                    <p class="text-4xl md:text-5xl font-black text-yellow-400 mt-2"><span id="final-score">0</span> <span class="text-2xl text-gray-400">/ 100</span></p>
+                    <div class="mt-2 text-xs text-indigo-300 font-medium">🌟 KELAS 5 - Sastra & Bahasa Indonesia 🌟</div>
+                </div>
             </div>
 
-            <!-- Tombol Aksi Akhir (Tombol Mainkan Kuis Lagi dihilangkan) -->
+            <!-- Tombol Aksi Akhir (Tanpa Tombol Mainkan Lagi) -->
             <div class="space-y-3">
-                <button onclick="sendToWhatsApp()" class="w-full py-3.5 px-6 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 font-bold rounded-xl shadow-lg transition text-white flex items-center justify-center gap-2.5 cursor-pointer text-sm md:text-base transform active:scale-95">
-                    <span class="text-lg">📱</span> Kirim Skor & Screenshot ke WhatsApp Guru/Teman
+                <button id="whatsapp-btn" onclick="sendScreenshotToWhatsApp()" class="w-full py-3.5 px-6 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 font-bold rounded-xl shadow-lg transition text-white flex items-center justify-center gap-2.5 cursor-pointer text-sm md:text-base transform active:scale-95">
+                    <span class="text-lg">📱</span> Kirim Hasil Screenshot ke WhatsApp Guru/Teman
                 </button>
             </div>
         </div>
@@ -283,6 +290,7 @@
         const resultScreen = document.getElementById('result-screen');
         const studentNameInput = document.getElementById('student-name');
         const nameError = document.getElementById('name-error');
+        const errorText = document.getElementById('error-text');
         const questionText = document.getElementById('question-text');
         const optionsContainer = document.getElementById('options-container');
         const questionCounter = document.getElementById('question-counter');
@@ -299,10 +307,23 @@
             initAudio();
             const nameVal = studentNameInput.value.trim();
             if (!nameVal) {
+                errorText.textContent = "Silakan masukkan nama lengkap kamu terlebih dahulu ya!";
                 nameError.classList.remove('hidden');
                 studentNameInput.focus();
                 return;
             }
+
+            // Validasi: Cek apakah nama ini sudah pernah digunakan sebelumnya (disimpan di localStorage)
+            const normalizedName = nameVal.toLowerCase();
+            const completedStudents = JSON.parse(localStorage.getItem('completed_quiz_students') || '[]');
+            
+            if (completedStudents.includes(normalizedName)) {
+                errorText.textContent = `Nama "${nameVal}" sudah pernah digunakan untuk mengerjakan kuis ini! Setiap nama hanya dapat bermain satu kali.`;
+                nameError.classList.remove('hidden');
+                studentNameInput.focus();
+                return;
+            }
+
             nameError.classList.add('hidden');
             studentName = nameVal;
 
@@ -326,7 +347,6 @@
             optionsContainer.innerHTML = '';
             q.options.forEach((opt, idx) => {
                 const btn = document.createElement('button');
-                // Tanpa emoticon di tombol pilihan jawaban
                 btn.className = "w-full text-left px-5 py-4 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/10 transition font-medium text-sm md:text-base cursor-pointer shadow-sm";
                 btn.textContent = opt.text;
                 btn.onclick = () => selectOption(opt, btn);
@@ -392,6 +412,14 @@
         }
 
         function showResult() {
+            // Tandai nama siswa ini sudah menyelesaikan kuis agar tidak bisa dipakai lagi
+            const normalizedName = studentName.toLowerCase();
+            const completedStudents = JSON.parse(localStorage.getItem('completed_quiz_students') || '[]');
+            if (!completedStudents.includes(normalizedName)) {
+                completedStudents.push(normalizedName);
+                localStorage.setItem('completed_quiz_students', JSON.stringify(completedStudents));
+            }
+
             quizScreen.classList.add('hidden');
             resultScreen.classList.remove('hidden');
             finalScoreEl.textContent = score;
@@ -409,17 +437,69 @@
             }
         }
 
-        function sendToWhatsApp() {
-            const message = `Halo Bapak/Ibu Guru atau Teman-teman,\n\nSaya *${studentName}* telah menyelesaikan Kuis Sastra & Bahasa Indonesia Kelas 5 dengan perolehan skor akhir: *${score} / 100* 🚀.\n\n(Jangan lupa lampirkan screenshot layar kuis ini sebagai bukti hasil pengerjaan ya!)`;
-            const encodedMessage = encodeURIComponent(message);
-            window.open(`https://api.whatsapp.com/send?text=${encodedMessage}`, '_blank');
+        // Fungsi membuat screenshot kartu hasil dan membagikannya ke WhatsApp
+        function sendScreenshotToWhatsApp() {
+            const btn = document.getElementById('whatsapp-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<span class="animate-spin text-lg">⏳</span> Sedang membuat screenshot hasil...`;
+            btn.disabled = true;
+
+            const captureCard = document.getElementById('capture-card');
+
+            html2canvas(captureCard, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#0f172a'
+            }).then(canvas => {
+                canvas.toBlob(blob => {
+                    const file = new File([blob], `Skor-Kuis-${studentName.replace(/\s+/g, '_')}.png`, { type: 'image/png' });
+                    
+                    // Cek apakah Web Share API mendukung berbagi file (gambar)
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        navigator.share({
+                            title: 'Hasil Kuis Sastra Kelas 5',
+                            text: `Halo Bapak/Ibu Guru, berikut adalah hasil tangkapan layar skor kuis saya (${studentName}): *${score} / 100* 🚀`,
+                            files: [file]
+                        }).then(() => {
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        }).catch(err => {
+                            console.log("Share dibatalkan atau gagal", err);
+                            fallbackDownloadAndWhatsApp(blob, file.name);
+                        });
+                    } else {
+                        // Fallback: Unduh gambar otomatis agar siswa bisa langsung lampirkan ke WhatsApp
+                        fallbackDownloadAndWhatsApp(blob, file.name);
+                    }
+                }, 'image/png');
+            }).catch(err => {
+                console.error("Gagal mengambil screenshot:", err);
+                // Fallback teks WhatsApp biasa jika html2canvas gagal
+                const message = `Halo Bapak/Ibu Guru,%0A%0ASaya *${studentName}* telah menyelesaikan Kuis Sastra & Bahasa Indonesia Kelas 5 dengan perolehan skor akhir: *${score} / 100* 🚀.`;
+                window.open(`https://api.whatsapp.com/send?text=${message}`, '_blank');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
         }
 
-        function restartGame() {
-            resultScreen.classList.add('hidden');
-            startScreen.classList.remove('hidden');
-            studentNameInput.value = "";
+        function fallbackDownloadAndWhatsApp(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            const message = encodeURIComponent(`Halo Bapak/Ibu Guru, ini bukti hasil tangkapan layar skor kuis saya (${studentName}): *${score} / 100* 🚀.`);
+            window.open(`https://api.whatsapp.com/send?text=${message}`, '_blank');
+            
+            const btn = document.getElementById('whatsapp-btn');
+            btn.innerHTML = `📱 Kirim Hasil Screenshot ke WhatsApp Guru/Teman`;
+            btn.disabled = false;
         }
     </script>
 </body>
 </html>
+```
