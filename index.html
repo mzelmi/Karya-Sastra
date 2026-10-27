@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Sastra & Bahasa Indonesia Interaktif</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        @keyframes bounceCorrect {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-6px) scale(1.01); }
+        }
+        @keyframes shakeWrong {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(234, 179, 8, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(234, 179, 8, 0.8); }
+        }
+        .animate-correct {
+            animation: bounceCorrect 0.4s ease infinite alternate;
+        }
+        .animate-wrong {
+            animation: shakeWrong 0.4s ease;
+        }
+        .glow-effect {
+            animation: pulseGlow 2s infinite;
+        }
+        @keyframes floatChar {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(2deg); }
+        }
+        .floating-char {
+            animation: floatChar 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-950 min-h-screen text-white flex items-center justify-center p-4">
+
+    <div class="max-w-xl w-full bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl p-6 md:p-8 border border-white/20 relative overflow-hidden">
+        
+        <!-- Background Decorative Ornaments -->
+        <div class="absolute -top-12 -right-12 w-36 h-36 bg-pink-500/20 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute -bottom-12 -left-12 w-36 h-36 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none"></div>
+
+        <!-- Header -->
+        <div class="text-center mb-6 relative z-10">
+            <div class="inline-block text-4xl mb-2 floating-char">🦉✨📚</div>
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-300 to-purple-300">
+                Kuis Sastra & Bahasa Indonesia
+            </h1>
+            <!-- Diperbesar ukuran tulisannya & tulisan SD/MI berprestasi dihilangkan -->
+            <div class="mt-2">
+                <span class="inline-block bg-gradient-to-r from-yellow-500/30 to-pink-500/30 border border-yellow-400/50 text-yellow-300 text-base md:text-lg font-extrabold px-6 py-2.5 rounded-full shadow-md tracking-wider">
+                    🌟 KELAS 5 🌟
+                </span>
+            </div>
+            <p class="text-xs md:text-sm text-indigo-200 mt-3">Uji kemampuan literasimu dengan tantangan yang seru dan interaktif!</p>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="text-center py-2 relative z-10">
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-5 mb-5 text-left">
+                <label for="student-name" class="block text-xs font-bold text-yellow-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <span>👤</span> Masukkan Nama Lengkap Siswa:
+                </label>
+                <input type="text" id="student-name" placeholder="Contoh: Salsabila Putri" class="w-full px-4 py-3.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/30 text-sm md:text-base font-medium transition">
+                <p id="name-error" class="text-pink-400 text-xs mt-1.5 font-medium hidden flex items-center gap-1">
+                    <span>⚠️</span> Silakan masukkan nama lengkap kamu terlebih dahulu ya!
+                </p>
+            </div>
+
+            <button onclick="startGame()" class="w-full py-4 px-6 bg-gradient-to-r from-pink-500 via-purple-500 to-yellow-500 hover:from-pink-600 hover:to-yellow-600 font-extrabold rounded-2xl shadow-xl transform transition active:scale-95 text-white text-base md:text-lg cursor-pointer glow-effect flex items-center justify-center gap-2">
+                <span>🚀</span> Mulai Petualangan Kuis Sekarang!
+            </button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden relative z-10">
+            <div class="flex justify-between items-center mb-3 text-xs md:text-sm font-semibold text-indigo-200">
+                <span id="question-counter" class="bg-indigo-900/50 px-3 py-1 rounded-full border border-indigo-500/30">Pertanyaan 1 dari 10</span>
+                <span id="score-container" class="bg-indigo-900/50 px-3 py-1 rounded-full border border-indigo-500/30 flex items-center gap-1">
+                    <span>🏆</span> Skor: <span id="current-score" class="text-yellow-300 font-extrabold">0</span>
+                </span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-white/20 h-2.5 rounded-full mb-6 overflow-hidden p-0.5 border border-white/10">
+                <div id="progress-bar" class="bg-gradient-to-r from-pink-500 via-purple-400 to-yellow-400 h-full rounded-full transition-all duration-500" style="width: 10%"></div>
+            </div>
+
+            <!-- Question Box -->
+            <div class="mb-5 bg-indigo-950/40 p-4 md:p-5 rounded-2xl border border-indigo-500/20 shadow-inner">
+                <h2 id="question-text" class="text-base md:text-lg font-bold leading-relaxed text-white">Pertanyaan akan muncul di sini...</h2>
+            </div>
+
+            <!-- Options Box (Tanpa Emoticon di Pilihan) -->
+            <div id="options-container" class="space-y-3 mb-5">
+                <!-- Dinamis diisi JS -->
+            </div>
+
+            <!-- Feedback / Next Button -->
+            <div id="feedback-container" class="hidden mt-4 p-4 rounded-2xl bg-indigo-900/80 border border-white/20 text-sm shadow-xl animate-fadeIn">
+                <div id="feedback-content" class="mb-3 text-sm md:text-base font-medium"></div>
+                <button onclick="nextQuestion()" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 font-bold rounded-xl shadow-lg transition text-white cursor-pointer flex items-center justify-center gap-2 text-sm md:text-base">
+                    <span>Lanjut Pertanyaan Berikutnya</span> <span>➡️</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="hidden text-center py-4 relative z-10">
+            <div class="text-7xl mb-3 animate-bounce" id="result-emoji">🏆</div>
+            <h2 class="text-2xl md:text-3xl font-extrabold mb-1 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-pink-300">Kuis Selesai!</h2>
+            <p class="text-indigo-200 text-sm md:text-base mb-4 font-medium">Kerja hebat, <span id="display-name" class="font-bold text-yellow-300"></span>!</p>
+            <p class="text-indigo-200 text-xs md:text-sm mb-6" id="result-message">Kamu telah menyelesaikan seluruh tantangan kuis dengan luar biasa.</p>
+            
+            <div class="bg-white/5 border border-white/15 rounded-2xl p-5 mb-6 shadow-inner">
+                <p class="text-xs md:text-sm text-indigo-300 font-semibold uppercase tracking-wider">Perolehan Skor Akhir Kamu:</p>
+                <p class="text-4xl md:text-5xl font-black text-yellow-400 mt-2"><span id="final-score">0</span> <span class="text-2xl text-gray-400">/ 100</span></p>
+            </div>
+
+            <!-- Tombol Aksi Akhir (Tombol Mainkan Kuis Lagi dihilangkan) -->
+            <div class="space-y-3">
+                <button onclick="sendToWhatsApp()" class="w-full py-3.5 px-6 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 font-bold rounded-xl shadow-lg transition text-white flex items-center justify-center gap-2.5 cursor-pointer text-sm md:text-base transform active:scale-95">
+                    <span class="text-lg">📱</span> Kirim Skor & Screenshot ke WhatsApp Guru/Teman
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Web Audio API untuk efek suara interaktif tanpa file eksternal
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            try {
+                initAudio();
+                if (!audioCtx) return;
+                
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    // Nada gembira naik
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.35);
+                } else if (type === 'wrong') {
+                    // Nada rendah turun
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.25);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                }
+            } catch (e) {
+                console.log("Audio not supported or blocked", e);
+            }
+        }
+
+        const questions = [
+            {
+                question: "1. Unsur yang ada di dalam karya sastra disebut ....",
+                options: [
+                    { text: "Unsur intrinsik dan ekstrinsik", isCorrect: true, rationale: "Hebat! Unsur pembangun karya sastra terdiri dari unsur intrinsik (dari dalam) dan ekstrinsik (dari luar)." },
+                    { text: "Unsur atom dan molekul", isCorrect: false, rationale: "Kurang tepat, itu adalah unsur kimia dalam pelajaran sains." },
+                    { text: "Unsur biologi dan anatomi", isCorrect: false, rationale: "Salah, itu berkaitan dengan ilmu makhluk hidup." },
+                    { text: "Unsur geografi dan sejarah", isCorrect: false, rationale: "Tidak tepat, itu adalah bagian dari ilmu sosial." }
+                ]
+            },
+            {
+                question: "2. Pelaku atau orang yang terlibat dalam cerita disebut ....",
+                options: [
+                    { text: "Latar", isCorrect: false, rationale: "Salah, latar adalah keterangan tempat, waktu, dan suasana cerita." },
+                    { text: "Tokoh", isCorrect: true, rationale: "Benar! Tokoh adalah pelaku yang mengalami atau memerankan peristiwa dalam sebuah cerita." },
+                    { text: "Alur", isCorrect: false, rationale: "Salah, alur adalah rangkaian jalannya peristiwa dalam cerita." },
+                    { text: "Amanat", isCorrect: false, rationale: "Salah, amanat adalah pesan moral yang ingin disampaikan penulis." }
+                ]
+            },
+            {
+                question: "3. Lawan dari protagonis adalah ....",
+                options: [
+                    { text: "Antagonis", isCorrect: true, rationale: "Tepat sekali! Antagonis adalah tokoh penentang atau musuh dari tokoh utama (protagonis)." },
+                    { text: "Tritagonis", isCorrect: false, rationale: "Salah, tritagonis adalah tokoh penengah dalam cerita." },
+                    { text: "Figuran", isCorrect: false, rationale: "Salah, figuran adalah pemeran pembantu dengan porsi kecil." },
+                    { text: "Protagonis pendukung", isCorrect: false, rationale: "Bukan istilah resmi dalam unsur penokohan." }
+                ]
+            },
+            {
+                question: "4. Manfaat membaca buku adalah ....",
+                options: [
+                    { text: "Membuang waktu luang dengan percuma", isCorrect: false, rationale: "Salah, membaca justru kegiatan yang sangat bermanfaat dan produktif." },
+                    { text: "Menambah wawasan dan pengetahuan luas", isCorrect: true, rationale: "Pintar! Buku adalah jendela dunia yang memperkaya wawasan serta pengetahuan pembacanya." },
+                    { text: "Membuat mata cepat lelah tanpa hasil", isCorrect: false, rationale: "Salah, itu efek jika posisi membaca salah, bukan manfaat utama." },
+                    { text: "Menghabiskan biaya belanja saja", isCorrect: false, rationale: "Tidak tepat, membaca buku bisa dilakukan secara gratis di perpustakaan." }
+                ]
+            },
+            {
+                question: "5. Sebutan lain untuk majas adalah ....",
+                options: [
+                    { text: "Gaya bahasa", isCorrect: true, rationale: "Benar! Majas sering juga disebut sebagai gaya bahasa yang digunakan untuk memperindah kalimat." },
+                    { text: "Bahasa baku", isCorrect: false, rationale: "Salah, bahasa baku adalah ragam bahasa standar resmi." },
+                    { text: "Kosakata ilmiah", isCorrect: false, rationale: "Salah, itu berkaitan dengan istilah khusus bidang ilmu pengetahuan." },
+                    { text: "Dialog percakapan", isCorrect: false, rationale: "Salah, dialog adalah bentuk komunikasi langsung antar tokoh." }
+                ]
+            },
+            {
+                question: "6. 'Bimo adalah anak emas orang tuanya.' Arti ungkapan anak emas pada kalimat di atas adalah ....",
+                options: [
+                    { text: "Anak yang terbuat dari logam mulia emas", isCorrect: false, rationale: "Salah, ini penafsiran harfiah yang keliru karena 'anak emas' adalah ungkapan/idiom." },
+                    { text: "Anak yang paling disayang atau diandalkan", isCorrect: true, rationale: "Hebat! Anak emas bermakna kiasan sebagai anak kesayangan atau yang paling disayangi." },
+                    { text: "Anak yang suka mengumpulkan perhiasan", isCorrect: false, rationale: "Salah, itu penafsiran keliru dari kata benda emas." },
+                    { text: "Anak yang bekerja di toko perhiasan", isCorrect: false, rationale: "Tidak tepat, itu profesi bukan arti ungkapan." }
+                ]
+            },
+            {
+                question: "7. Majas yang membandingkan dua hal yang memiliki sifat sama, tetapi dalam bentuk yang singkat disebut ....",
+                options: [
+                    { text: "Majas personifikasi", isCorrect: false, rationale: "Salah, personifikasi membandingkan benda mati seolah bernyawa." },
+                    { text: "Majas hiperbola", isCorrect: false, rationale: "Salah, hiperbola adalah majas yang melebih-lebihkan suatu keadaan." },
+                    { text: "Majas simile (atau metafora ringkas)", isCorrect: true, rationale: "Tepat sekali! Perbandingan langsung atau sifat singkat merujuk pada metafora atau simile sederhana." },
+                    { text: "Majas ironi", isCorrect: false, rationale: "Salah, ironi adalah bentuk majas sindiran halus." }
+                ]
+            },
+            {
+                question: "8. Fabel adalah cerita rekaan yang semua tokohnya terdiri atas binatang yang berperilaku seperti manusia. Contoh judul fabel adalah ....",
+                options: [
+                    { text: "Kancil dan Buaya", isCorrect: true, rationale: "Benar! Kisah Kancil dan Buaya adalah contoh cerita fabel klasik nusantara yang sangat populer." },
+                    { text: "Sangkuriang", isCorrect: false, rationale: "Salah, itu adalah cerita legenda nusantara." },
+                    { text: "Malin Kundang", isCorrect: false, rationale: "Salah, itu adalah cerita rakyat bertema durhaka kepada orang tua." },
+                    { text: "Bawang Merah Bawang Putih", isCorrect: false, rationale: "Salah, itu adalah cerita dongeng tradisional manusia." }
+                ]
+            },
+            {
+                question: "9. Orang yang bertugas menyunting atau memeriksa naskah buku sebelum diterbitkan adalah ....",
+                options: [
+                    { text: "Ilustrator", isCorrect: false, rationale: "Salah, ilustrator bertugas membuat gambar atau ilustrasi dalam buku." },
+                    { text: "Editor", isCorrect: true, rationale: "Pintar! Editor atau penyunting naskah bertugas memeriksa dan memperbaiki isi naskah." },
+                    { text: "Penerbit", isCorrect: false, rationale: "Salah, penerbit adalah lembaga atau badan usaha yang menerbitkan." },
+                    { text: "Penulis", isCorrect: false, rationale: "Salah, penulis adalah pencipta naskah asli buku tersebut." }
+                ]
+            },
+            {
+                question: "10. Pihak yang bertindak menerbitkan buku adalah ....",
+                options: [
+                    { text: "Percetakan", isCorrect: false, rationale: "Salah, percetakan bertugas memproduksi fisik buku, bukan mempublikasikan secara menyeluruh." },
+                    { text: "Penerbit", isCorrect: true, rationale: "Hebat! Penerbit adalah pihak yang mengurus proses publikasi hingga buku siap dipasarkan ke pembaca." },
+                    { text: "Distributor", isCorrect: false, rationale: "Salah, distributor bertugas menyalurkan buku ke toko-toko buku." },
+                    { text: "Pustakawan", isCorrect: false, rationale: "Salah, pustakawan bertugas mengelola perpustakaan." }
+                ]
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let studentName = "";
+        let answered = false;
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const studentNameInput = document.getElementById('student-name');
+        const nameError = document.getElementById('name-error');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const questionCounter = document.getElementById('question-counter');
+        const currentScoreEl = document.getElementById('current-score');
+        const progressBar = document.getElementById('progress-bar');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const feedbackContent = document.getElementById('feedback-content');
+        const finalScoreEl = document.getElementById('final-score');
+        const displayNameEl = document.getElementById('display-name');
+        const resultMessage = document.getElementById('result-message');
+        const resultEmoji = document.getElementById('result-emoji');
+
+        function startGame() {
+            initAudio();
+            const nameVal = studentNameInput.value.trim();
+            if (!nameVal) {
+                nameError.classList.remove('hidden');
+                studentNameInput.focus();
+                return;
+            }
+            nameError.classList.add('hidden');
+            studentName = nameVal;
+
+            startScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            currentQuestionIndex = 0;
+            score = 0;
+            currentScoreEl.textContent = score;
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            answered = false;
+            feedbackContainer.classList.add('hidden');
+            
+            const q = questions[currentQuestionIndex];
+            questionText.textContent = q.question;
+            questionCounter.textContent = `Pertanyaan ${currentQuestionIndex + 1} dari ${questions.length}`;
+            progressBar.style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
+
+            optionsContainer.innerHTML = '';
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                // Tanpa emoticon di tombol pilihan jawaban
+                btn.className = "w-full text-left px-5 py-4 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/10 transition font-medium text-sm md:text-base cursor-pointer shadow-sm";
+                btn.textContent = opt.text;
+                btn.onclick = () => selectOption(opt, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function selectOption(selectedOpt, btnElement) {
+            if (answered) return;
+            answered = true;
+
+            const allButtons = optionsContainer.getElementsByTagName('button');
+            const q = questions[currentQuestionIndex];
+
+            Array.from(allButtons).forEach(btn => {
+                btn.disabled = true;
+                const matchOpt = q.options.find(o => o.text === btn.textContent);
+                if (matchOpt.isCorrect) {
+                    btn.classList.remove('bg-white/10', 'hover:bg-white/20');
+                    btn.classList.add('bg-green-600/90', 'border-green-400', 'text-white', 'shadow-lg');
+                }
+            });
+
+            if (selectedOpt.isCorrect) {
+                score += 10;
+                currentScoreEl.textContent = score;
+                btnElement.classList.add('animate-correct');
+                playSound('correct');
+                feedbackContent.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <span class="text-3xl">🥳🎉</span>
+                        <div>
+                            <strong class="text-green-300 block text-base md:text-lg mb-0.5">Luar Biasa, Benar Sekali!</strong>
+                            <p class="text-indigo-100 text-xs md:text-sm leading-relaxed">${selectedOpt.rationale}</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                btnElement.classList.remove('bg-white/10', 'hover:bg-white/20');
+                btnElement.classList.add('bg-red-600/90', 'border-red-400', 'text-white', 'animate-wrong', 'shadow-lg');
+                playSound('wrong');
+                feedbackContent.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <span class="text-3xl">🥺💪</span>
+                        <div>
+                            <strong class="text-red-300 block text-base md:text-lg mb-0.5">Kurang Tepat, Tetap Semangat!</strong>
+                            <p class="text-indigo-100 text-xs md:text-sm leading-relaxed">${selectedOpt.rationale}</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            feedbackContainer.classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            finalScoreEl.textContent = score;
+            displayNameEl.textContent = studentName;
+
+            if (score === 100) {
+                resultEmoji.textContent = "🏆✨🦉";
+                resultMessage.textContent = "Sempurna! Kamu menguasai materi sastra dan bahasa kelas 5 ini dengan sangat luar biasa!";
+            } else if (score >= 70) {
+                resultEmoji.textContent = "🌟🎉🥳";
+                resultMessage.textContent = "Kerja hebat! Pengetahuan literasi dan sastramu sudah sangat membanggakan.";
+            } else {
+                resultEmoji.textContent = "💪📚📖";
+                resultMessage.textContent = "Jangan patah semangat! Yuk pelajari lagi materinya agar skor kuis berikutnya jauh lebih tinggi.";
+            }
+        }
+
+        function sendToWhatsApp() {
+            const message = `Halo Bapak/Ibu Guru atau Teman-teman,\n\nSaya *${studentName}* telah menyelesaikan Kuis Sastra & Bahasa Indonesia Kelas 5 dengan perolehan skor akhir: *${score} / 100* 🚀.\n\n(Jangan lupa lampirkan screenshot layar kuis ini sebagai bukti hasil pengerjaan ya!)`;
+            const encodedMessage = encodeURIComponent(message);
+            window.open(`https://api.whatsapp.com/send?text=${encodedMessage}`, '_blank');
+        }
+
+        function restartGame() {
+            resultScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            studentNameInput.value = "";
+        }
+    </script>
+</body>
+</html>
